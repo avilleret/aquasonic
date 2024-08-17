@@ -1,0 +1,73 @@
+esphome:
+  name: aquasonic
+
+esp32:
+  board: featheresp32
+  framework:
+    type: arduino
+
+# Enable logging
+logger:
+
+# Enable Home Assistant API
+api:
+  password: ""
+
+ota:
+  - platform: esphome
+    password: ""
+
+wifi:
+  networks:
+  - ssid: !secret ssid1
+    password: !secret password1
+  - ssid: !secret ssid2
+    password: !secret password2
+  - ssid: !secret ssid3
+    password: !secret password3
+
+  # Enable fallback hotspot (captive portal) in case wifi connection fails
+  ap:
+    ssid: !secret ap_ssid
+    password: !secret ap_password
+
+captive_portal:
+
+one_wire:
+  - platform: gpio
+    pin: 4
+
+uart:
+  tx_pin: 17
+  rx_pin: 16
+  baud_rate: 115200
+  rx_buffer_size: 16
+
+sensor:
+  - platform: tfmini
+    distance:
+      name: 'Water Level'
+    power:
+      name: 'Signal Strength'
+  - platform: dallas_temp
+    address: 0xa53c9004572ebb28
+    name: 'Water Temperature'
+    update_interval: 10s
+  - platform: dallas_temp
+    address: 0x803c4ae381ded628
+    name: 'Air Temperature'
+    update_interval: 10s
+  - platform: pulse_counter
+    pin: GPIO18
+    name: "Flow Pump 1"
+  - platform: pulse_counter
+    pin: GPIO19
+    name: "Flow Pump 2"
+  - platform: adc
+    pin: GPIO32
+    name: "Air Pressure 1"
+    update_interval: 60s
+  - platform: adc
+    pin: GPIO33
+    name: "Air Pressure 2"
+    update_interval: 60s
