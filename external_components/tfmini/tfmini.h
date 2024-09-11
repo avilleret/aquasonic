@@ -31,4 +31,4 @@ class TFMiniSensor : public PollingComponent, public uart::UARTDevice {
 };
 
 }  // namespace tfmini
-}  // namespace esphome
+}  // namespace esphomew

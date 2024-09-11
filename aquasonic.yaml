@@ -8,6 +8,7 @@ esp32:
 
 # Enable logging
 logger:
+  level: WARN
 
 # Enable Home Assistant API
 api:
@@ -33,6 +34,9 @@ wifi:
 
 captive_portal:
 
+external_components:
+  - source: external_components
+
 one_wire:
   - platform: gpio
     pin: 4
@@ -49,14 +53,15 @@ sensor:
       name: 'Water Level'
     power:
       name: 'Signal Strength'
+    update_interval: 1s
   - platform: dallas_temp
     address: 0xa53c9004572ebb28
     name: 'Water Temperature'
-    update_interval: 10s
+    update_interval: 60s
   - platform: dallas_temp
     address: 0x803c4ae381ded628
     name: 'Air Temperature'
-    update_interval: 10s
+    update_interval: 60s
   - platform: pulse_counter
     pin: GPIO18
     name: "Flow Pump 1"

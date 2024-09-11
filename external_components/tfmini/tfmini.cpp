@@ -13,28 +13,37 @@ void TFMiniSensor::update() {
   uint8_t peeked;
 
   // this->flush();
-  if(this->available() < TFMINI_RESPONSE_LENGTH)
+  size_t available = this->available(); 
+  if(available < TFMINI_RESPONSE_LENGTH)
+  {
+    ESP_LOGW(TAG, "Not enough available data %d < %d!", available, TFMINI_RESPONSE_LENGTH);
     return;
+  }
 
   while (this->available() > 0 && this->peek_byte(&peeked) && peeked != TFMINI_START_BYTE)
+  {
     this->read();
+  }
 
   bool read_success = read_array(response, TFMINI_RESPONSE_LENGTH);
 
-  if (!read_success) {
+  if (!read_success) 
+  {
     ESP_LOGW(TAG, "Reading data from TFMini failed!");
     status_set_warning();
     return;
   }
 
-  if (response[0] != TFMINI_START_BYTE || response[1] != TFMINI_START_BYTE) {
+  if (response[0] != TFMINI_START_BYTE || response[1] != TFMINI_START_BYTE) 
+  {
     ESP_LOGW(TAG, "Invalid preamble for TFMini response!");
     this->status_set_warning();
     return;
   }
 
   uint16_t calculated_checksum = this->tfmini_checksum_(response);
-  if (calculated_checksum != response[TFMINI_RESPONSE_LENGTH - 1]) {
+  if (calculated_checksum != response[TFMINI_RESPONSE_LENGTH - 1]) 
+  {
     ESP_LOGW(TAG, "TFMini Checksum doesn't match: 0x%02X!=0x%02X", response[TFMINI_RESPONSE_LENGTH - 1],
              calculated_checksum);
     this->status_set_warning();
@@ -43,10 +52,10 @@ void TFMiniSensor::update() {
 
   this->status_clear_warning();
 
-  // ESP_LOGD(TAG, "Successfully read TFMini data");
-
   const unsigned int distance = response[2] + (response[3] << 8);
   const unsigned int strength = response[4] + (response[5] << 8);
+
+  ESP_LOGD(TAG, "Successfully read TFMini data");
 
   cyclic_distance_buffer.push_back(distance);
   distance_sum += distance;
@@ -66,7 +75,7 @@ void TFMiniSensor::update() {
 
   head++;
 
-  if(head >= 6000)
+  if(head >= 10)
   {
     const float distance = float(distance_sum) / float(cyclic_distance_buffer.size());
     const float strength = float(strength_sum) / float(cyclic_strength_buffer.size());
@@ -85,13 +94,15 @@ void TFMiniSensor::update() {
 
 uint8_t TFMiniSensor::tfmini_checksum_(uint8_t *ptr) {
   unsigned sum = 0;
-  for (int i = 0; i < (TFMINI_RESPONSE_LENGTH - 1); i++) {
+  for (int i = 0; i < (TFMINI_RESPONSE_LENGTH - 1); i++) 
+  {
     sum += *ptr++;
   }
   return uint8_t(sum & 0xFF);
 }
 
-void TFMiniSensor::dump_config() {
+void TFMiniSensor::dump_config()
+{
   ESP_LOGCONFIG(TAG, "TFMini:");
   LOG_SENSOR("  ", "Distance", this->distance_sensor_);
   LOG_SENSOR("  ", "Strength", this->strength_sensor_);
