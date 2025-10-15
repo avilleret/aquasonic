@@ -55,7 +55,7 @@ void TFMiniSensor::update() {
   const unsigned int distance = response[2] + (response[3] << 8);
   const unsigned int strength = response[4] + (response[5] << 8);
 
-  ESP_LOGD(TAG, "Successfully read TFMini data");
+  ESP_LOGD(TAG, "Successfully read TFMini data, distance: %u and strength: %u", distance, strength);
 
   cyclic_distance_buffer.push_back(distance);
   distance_sum += distance;
@@ -77,16 +77,16 @@ void TFMiniSensor::update() {
 
   if(head >= 10)
   {
-    const float distance = float(distance_sum) / float(cyclic_distance_buffer.size());
-    const float strength = float(strength_sum) / float(cyclic_strength_buffer.size());
+    const float distance_flt = float(distance_sum) / float(cyclic_distance_buffer.size());
+    const float strength_flt = float(strength_sum) / float(cyclic_strength_buffer.size());
 
-    ESP_LOGD(TAG, "Received distance: %u cm", distance);
+    ESP_LOGD(TAG, "Received distance: %u cm", distance_flt);
     if (this->distance_sensor_ != nullptr)
-      this->distance_sensor_->publish_state(distance);
+      this->distance_sensor_->publish_state(distance_flt);
 
-    ESP_LOGD(TAG, "Received signal strength: %u", strength);
+    ESP_LOGD(TAG, "Received signal strength: %u", strength_flt);
     if (this->strength_sensor_ != nullptr)
-      this->strength_sensor_->publish_state(strength);
+      this->strength_sensor_->publish_state(strength_flt);
 
     head = 0;
   }
