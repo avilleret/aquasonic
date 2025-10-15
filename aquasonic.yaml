@@ -8,7 +8,7 @@ esp32:
 
 # Enable logging
 logger:
-  level: WARN
+  # level: WARN
 
 # Enable Home Assistant API
 api:
@@ -55,26 +55,15 @@ wifi:
 
 captive_portal:
 
-external_components:
-  - source: external_components
-
 one_wire:
   - platform: gpio
-    pin: 4
-
-uart:
-  tx_pin: 17
-  rx_pin: 16
-  baud_rate: 115200
-  rx_buffer_size: 16
+    pin:
+      number: 4
+      mode:
+        input: true
+        pullup: true
 
 sensor:
-  - platform: tfmini
-    distance:
-      name: 'Water Level'
-    power:
-      name: 'Signal Strength'
-    update_interval: 1s
   - platform: dallas_temp
     address: 0xa53c9004572ebb28
     name: 'Water Temperature'
