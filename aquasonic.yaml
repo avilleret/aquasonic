@@ -2,7 +2,7 @@ esphome:
   name: aquasonic
 
 esp32:
-  board: featheresp32
+  board: nodemcu-32s
   framework:
     type: arduino
 
@@ -13,7 +13,21 @@ logger:
 # Enable Home Assistant API
 api:
   password: ""
-
+  on_client_connected:
+    - if:
+        condition:
+          lambda: 'return (0 == client_info.find("Home Assistant "));' 
+        then:
+          - light.turn_on: 
+              id: wifi_led
+              effect: blink_fast
+          
+  on_client_disconnected:
+    - if:
+        condition:
+          lambda: 'return (0 == client_info.find("Home Assistant "));' 
+        then:
+          - light.turn_off: wifi_led
 ota:
   - platform: esphome
     password: ""
@@ -22,10 +36,17 @@ wifi:
   networks:
   - ssid: !secret ssid1
     password: !secret password1
-  - ssid: !secret ssid2
-    password: !secret password2
-  - ssid: !secret ssid3
-    password: !secret password3
+  enable_on_boot: True
+  id: wlan
+  on_connect: 
+    then: 
+      - light.turn_on:
+          id: wifi_led
+          effect: blink_slow
+
+  on_disconnect: 
+    then: 
+      light.turn_off: wifi_led
 
   # Enable fallback hotspot (captive portal) in case wifi connection fails
   ap:
@@ -76,3 +97,27 @@ sensor:
     pin: GPIO33
     name: "Air Pressure 2"
     update_interval: 60s
+
+output:
+  - platform: gpio
+    pin: LED
+    id: led_wifi
+light:
+  - platform: binary
+    id: wifi_led
+    output: led_wifi
+    effects:
+      - strobe:
+          name: "blink_slow"
+          colors:
+            - state: true
+              duration: 100ms
+            - state: false
+              duration: 1900ms
+      - strobe:
+          name: "blink_fast"
+          colors:
+            - state: true
+              duration: 200ms
+            - state: false
+              duration: 200ms
